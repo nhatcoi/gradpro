@@ -104,9 +104,42 @@ public class RegistrationPeriodService {
                 .collect(Collectors.toList());
     }
     
+    /**
+     * Lấy đợt đăng ký hiện tại (entity)
+     * Ưu tiên: đợt đang diễn ra (startDate <= now <= endDate)
+     * Nếu không có, trả về đợt active gần nhất
+     */
+    public Optional<RegistrationPeriod> getCurrentOpenPeriodEntity() {
+        LocalDateTime now = LocalDateTime.now();
+        
+        // Ưu tiên tìm đợt đang diễn ra
+        Optional<RegistrationPeriod> currentPeriod = periodRepository.findCurrentOpenPeriod(now);
+        if (currentPeriod.isPresent()) {
+            return currentPeriod;
+        }
+        
+        // Nếu không có đợt đang diễn ra, tìm đợt active gần nhất (sắp tới hoặc vừa kết thúc)
+        List<RegistrationPeriod> activePeriods = periodRepository.findByActiveTrueOrderByStartDateDesc();
+        if (!activePeriods.isEmpty()) {
+            // Trả về đợt có startDate gần nhất với thời gian hiện tại
+            return activePeriods.stream()
+                    .min((p1, p2) -> {
+                        long diff1 = Math.abs(java.time.Duration.between(now, p1.getStartDate()).toMinutes());
+                        long diff2 = Math.abs(java.time.Duration.between(now, p2.getStartDate()).toMinutes());
+                        return Long.compare(diff1, diff2);
+                    });
+        }
+        
+        return Optional.empty();
+    }
+    
+    /**
+     * Lấy đợt đăng ký hiện tại (DTO)
+     * Ưu tiên: đợt đang diễn ra (startDate <= now <= endDate)
+     * Nếu không có, trả về đợt active gần nhất
+     */
     public Optional<RegistrationPeriodDto> getCurrentOpenPeriod() {
-        return periodRepository.findCurrentOpenPeriod(LocalDateTime.now())
-                .map(this::toDto);
+        return getCurrentOpenPeriodEntity().map(this::toDto);
     }
     
     private RegistrationPeriodDto toDto(RegistrationPeriod period) {

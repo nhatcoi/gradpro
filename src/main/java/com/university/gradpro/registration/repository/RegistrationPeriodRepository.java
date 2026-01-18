@@ -17,9 +17,16 @@ public interface RegistrationPeriodRepository extends JpaRepository<Registration
     
     List<RegistrationPeriod> findByActiveTrue();
     
+    // Tìm đợt đăng ký đang diễn ra (thời gian hiện tại nằm trong khoảng startDate và endDate)
     @Query("SELECT rp FROM RegistrationPeriod rp WHERE rp.active = true AND " +
-           ":now BETWEEN rp.startDate AND rp.endDate")
+           ":now >= rp.startDate AND :now <= rp.endDate " +
+           "ORDER BY rp.startDate DESC")
     Optional<RegistrationPeriod> findCurrentOpenPeriod(@Param("now") LocalDateTime now);
+    
+    // Tìm đợt đăng ký sắp tới gần nhất
+    @Query("SELECT rp FROM RegistrationPeriod rp WHERE rp.active = true AND rp.startDate > :now " +
+           "ORDER BY rp.startDate ASC")
+    List<RegistrationPeriod> findUpcomingPeriods(@Param("now") LocalDateTime now);
     
     @Query("SELECT rp FROM RegistrationPeriod rp WHERE rp.semester = :semester AND rp.active = true")
     Optional<RegistrationPeriod> findActiveBySemester(@Param("semester") String semester);

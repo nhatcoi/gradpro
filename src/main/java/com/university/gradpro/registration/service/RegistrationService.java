@@ -10,7 +10,6 @@ import com.university.gradpro.common.response.PageResponse;
 import com.university.gradpro.registration.dto.*;
 import com.university.gradpro.registration.entity.Registration;
 import com.university.gradpro.registration.entity.RegistrationPeriod;
-import com.university.gradpro.registration.repository.RegistrationPeriodRepository;
 import com.university.gradpro.registration.repository.RegistrationRepository;
 import com.university.gradpro.topic.entity.Topic;
 import com.university.gradpro.topic.repository.TopicRepository;
@@ -31,7 +30,7 @@ import java.util.stream.Collectors;
 public class RegistrationService {
     
     private final RegistrationRepository registrationRepository;
-    private final RegistrationPeriodRepository periodRepository;
+    private final RegistrationPeriodService periodService;
     private final TopicRepository topicRepository;
     private final UserRepository userRepository;
     
@@ -48,8 +47,8 @@ public class RegistrationService {
         }
         
         // Kiểm tra đợt đăng ký hiện tại
-        RegistrationPeriod currentPeriod = periodRepository
-                .findCurrentOpenPeriod(LocalDateTime.now())
+        RegistrationPeriod currentPeriod = periodService
+                .getCurrentOpenPeriodEntity()
                 .orElseThrow(() -> new BadRequestException("Hiện tại không có đợt đăng ký nào đang mở"));
         
         // Kiểm tra sinh viên đã đăng ký trong đợt này chưa
@@ -155,6 +154,7 @@ public class RegistrationService {
     /**
      * Lấy đăng ký của sinh viên
      */
+    @Transactional(readOnly = true)
     public List<RegistrationDto> getRegistrationsByStudent(Long studentId) {
         return registrationRepository.findByStudentId(studentId)
                 .stream()
@@ -165,6 +165,7 @@ public class RegistrationService {
     /**
      * Lấy đăng ký theo đề tài của giảng viên
      */
+    @Transactional(readOnly = true)
     public PageResponse<RegistrationDto> getRegistrationsByLecturer(Long lecturerId, RegistrationStatus status, Pageable pageable) {
         Page<Registration> page;
         if (status != null) {

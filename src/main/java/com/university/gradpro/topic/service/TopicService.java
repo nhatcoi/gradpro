@@ -209,6 +209,7 @@ public class TopicService {
     /**
      * UC-4.2, UC-5.2: Tìm kiếm đề tài
      */
+    @Transactional(readOnly = true)
     public PageResponse<TopicDto> searchTopics(String keyword, Pageable pageable) {
         Page<Topic> page = topicRepository.searchTopics(keyword, pageable);
         return PageResponse.from(page.map(this::toDto));
@@ -217,6 +218,7 @@ public class TopicService {
     /**
      * Lấy đề tài có sẵn để đăng ký
      */
+    @Transactional(readOnly = true)
     public PageResponse<TopicDto> getAvailableTopics(String semester, Pageable pageable) {
         Page<Topic> page;
         if (semester != null && !semester.isBlank()) {
@@ -230,6 +232,7 @@ public class TopicService {
     /**
      * Lấy đề tài theo trạng thái
      */
+    @Transactional(readOnly = true)
     public PageResponse<TopicDto> getTopicsByStatus(TopicStatus status, Pageable pageable) {
         Page<Topic> page = topicRepository.findByStatus(status, pageable);
         return PageResponse.from(page.map(this::toDto));
@@ -238,6 +241,7 @@ public class TopicService {
     /**
      * Lấy đề tài của giảng viên
      */
+    @Transactional(readOnly = true)
     public List<TopicDto> getTopicsByLecturer(Long lecturerId) {
         return topicRepository.findByLecturerId(lecturerId)
                 .stream()
@@ -248,6 +252,7 @@ public class TopicService {
     /**
      * Lấy đề tài mà giảng viên đang hướng dẫn
      */
+    @Transactional(readOnly = true)
     public List<TopicDto> getTopicsBySupervisor(Long supervisorId) {
         return topicRepository.findBySupervisorId(supervisorId)
                 .stream()
@@ -255,12 +260,14 @@ public class TopicService {
                 .collect(Collectors.toList());
     }
     
+    @Transactional(readOnly = true)
     public TopicDto getTopicById(Long id) {
-        Topic topic = topicRepository.findById(id)
+        Topic topic = topicRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Đề tài", "id", id));
         return toDto(topic);
     }
     
+    @Transactional(readOnly = true)
     public TopicDto getTopicByCode(String code) {
         Topic topic = topicRepository.findByCode(code)
                 .orElseThrow(() -> new ResourceNotFoundException("Đề tài", "mã", code));

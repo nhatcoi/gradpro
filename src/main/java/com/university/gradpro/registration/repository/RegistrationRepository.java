@@ -15,7 +15,15 @@ import java.util.Optional;
 @Repository
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
     
-    List<Registration> findByStudentId(Long studentId);
+    @Query("SELECT r FROM Registration r " +
+           "LEFT JOIN FETCH r.student " +
+           "LEFT JOIN FETCH r.topic t " +
+           "LEFT JOIN FETCH t.lecturer " +
+           "LEFT JOIN FETCH t.supervisor " +
+           "LEFT JOIN FETCH r.period " +
+           "LEFT JOIN FETCH r.approvedBy " +
+           "WHERE r.student.id = :studentId")
+    List<Registration> findByStudentId(@Param("studentId") Long studentId);
     
     List<Registration> findByTopicId(Long topicId);
     
@@ -27,10 +35,26 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     
     Page<Registration> findByStatus(RegistrationStatus status, Pageable pageable);
     
-    @Query("SELECT r FROM Registration r WHERE r.topic.lecturer.id = :lecturerId")
+    @Query(value = "SELECT r FROM Registration r " +
+           "LEFT JOIN FETCH r.student " +
+           "LEFT JOIN FETCH r.topic t " +
+           "LEFT JOIN FETCH t.lecturer " +
+           "LEFT JOIN FETCH t.supervisor " +
+           "LEFT JOIN FETCH r.period " +
+           "LEFT JOIN FETCH r.approvedBy " +
+           "WHERE r.topic.lecturer.id = :lecturerId",
+           countQuery = "SELECT COUNT(r) FROM Registration r WHERE r.topic.lecturer.id = :lecturerId")
     Page<Registration> findByLecturerId(@Param("lecturerId") Long lecturerId, Pageable pageable);
     
-    @Query("SELECT r FROM Registration r WHERE r.topic.lecturer.id = :lecturerId AND r.status = :status")
+    @Query(value = "SELECT r FROM Registration r " +
+           "LEFT JOIN FETCH r.student " +
+           "LEFT JOIN FETCH r.topic t " +
+           "LEFT JOIN FETCH t.lecturer " +
+           "LEFT JOIN FETCH t.supervisor " +
+           "LEFT JOIN FETCH r.period " +
+           "LEFT JOIN FETCH r.approvedBy " +
+           "WHERE r.topic.lecturer.id = :lecturerId AND r.status = :status",
+           countQuery = "SELECT COUNT(r) FROM Registration r WHERE r.topic.lecturer.id = :lecturerId AND r.status = :status")
     Page<Registration> findByLecturerIdAndStatus(@Param("lecturerId") Long lecturerId, 
                                                    @Param("status") RegistrationStatus status, 
                                                    Pageable pageable);
