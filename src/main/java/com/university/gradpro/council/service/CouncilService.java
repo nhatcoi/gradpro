@@ -13,6 +13,7 @@ import com.university.gradpro.council.repository.CouncilMemberRepository;
 import com.university.gradpro.council.repository.CouncilRepository;
 import com.university.gradpro.council.repository.DefenseScheduleRepository;
 import com.university.gradpro.topic.entity.Topic;
+import org.hibernate.Hibernate;
 import com.university.gradpro.topic.repository.TopicRepository;
 import com.university.gradpro.user.entity.User;
 import com.university.gradpro.user.repository.UserRepository;
@@ -211,33 +212,46 @@ public class CouncilService {
         defenseScheduleRepository.save(schedule);
     }
     
+    @Transactional(readOnly = true)
     public CouncilDto getCouncilById(Long id) {
-        Council council = councilRepository.findById(id)
+        Council council = councilRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Hội đồng", "id", id));
+        // Force initialize schedules collection
+        Hibernate.initialize(council.getSchedules());
         return toDto(council);
     }
     
+    @Transactional(readOnly = true)
     public CouncilDto getCouncilByCode(String code) {
         Council council = councilRepository.findByCode(code)
                 .orElseThrow(() -> new ResourceNotFoundException("Hội đồng", "mã", code));
+        // Force initialize schedules collection
+        Hibernate.initialize(council.getSchedules());
         return toDto(council);
     }
     
+    @Transactional(readOnly = true)
     public List<CouncilDto> getCouncilsBySemester(String semester) {
-        return councilRepository.findBySemester(semester)
-                .stream()
+        List<Council> councils = councilRepository.findBySemester(semester);
+        // Force initialize schedules for each council
+        councils.forEach(c -> Hibernate.initialize(c.getSchedules()));
+        return councils.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
     
+    @Transactional(readOnly = true)
     public Page<CouncilDto> getActiveCouncilsBySemester(String semester, Pageable pageable) {
         return councilRepository.findBySemesterAndActiveTrue(semester, pageable)
                 .map(this::toDto);
     }
     
+    @Transactional(readOnly = true)
     public List<CouncilDto> getCouncilsByLecturer(Long lecturerId) {
-        return councilRepository.findByMemberLecturerId(lecturerId)
-                .stream()
+        List<Council> councils = councilRepository.findByMemberLecturerId(lecturerId);
+        // Force initialize schedules for each council
+        councils.forEach(c -> Hibernate.initialize(c.getSchedules()));
+        return councils.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }

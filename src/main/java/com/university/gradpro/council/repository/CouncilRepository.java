@@ -14,11 +14,13 @@ import java.util.Optional;
 @Repository
 public interface CouncilRepository extends JpaRepository<Council, Long> {
     
-    Optional<Council> findByCode(String code);
+    @Query("SELECT c FROM Council c LEFT JOIN FETCH c.members m LEFT JOIN FETCH m.lecturer WHERE c.code = :code")
+    Optional<Council> findByCode(@Param("code") String code);
     
     boolean existsByCode(String code);
     
-    List<Council> findBySemester(String semester);
+    @Query("SELECT DISTINCT c FROM Council c LEFT JOIN FETCH c.members m LEFT JOIN FETCH m.lecturer WHERE c.semester = :semester")
+    List<Council> findBySemester(@Param("semester") String semester);
     
     List<Council> findByDepartment(String department);
     
@@ -28,8 +30,14 @@ public interface CouncilRepository extends JpaRepository<Council, Long> {
     List<Council> findByDepartmentAndSemester(@Param("department") String department, 
                                                @Param("semester") String semester);
     
-    @Query("SELECT c FROM Council c JOIN c.members m WHERE m.lecturer.id = :lecturerId")
+    @Query("SELECT DISTINCT c FROM Council c LEFT JOIN FETCH c.members m LEFT JOIN FETCH m.lecturer JOIN m.lecturer l WHERE l.id = :lecturerId")
     List<Council> findByMemberLecturerId(@Param("lecturerId") Long lecturerId);
+    
+    @Query("SELECT DISTINCT c FROM Council c LEFT JOIN FETCH c.members m LEFT JOIN FETCH m.lecturer WHERE c.id = :id")
+    Optional<Council> findByIdWithRelations(@Param("id") Long id);
+    
+    @Query("SELECT DISTINCT c FROM Council c LEFT JOIN FETCH c.schedules s LEFT JOIN FETCH s.topic t LEFT JOIN FETCH t.student st WHERE c.id = :id")
+    Optional<Council> findByIdWithSchedules(@Param("id") Long id);
     
     @Query("SELECT COUNT(c) FROM Council c WHERE c.semester = :semester")
     long countBySemester(@Param("semester") String semester);
