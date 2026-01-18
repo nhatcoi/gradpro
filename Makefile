@@ -1,104 +1,120 @@
-# ============================================
-# Makefile cho GradPro
-# ============================================
+# GradPro - Makefile
+# Quản lý Docker và Development
 
-.PHONY: help build run stop clean logs dev prod
+.PHONY: help dev-db dev-server dev-client dev start stop logs clean build
 
-# Mặc định
+# Default
 help:
 	@echo "GradPro - Hệ thống Quản lý Đồ án Tốt nghiệp"
 	@echo ""
-	@echo "Các lệnh có sẵn:"
-	@echo "  make dev          - Chạy PostgreSQL cho development"
-	@echo "  make dev-stop     - Dừng PostgreSQL development"
-	@echo "  make build        - Build Docker image"
-	@echo "  make run          - Chạy toàn bộ hệ thống (app + db)"
-	@echo "  make run-tools    - Chạy với pgAdmin"
-	@echo "  make stop         - Dừng toàn bộ containers"
-	@echo "  make logs         - Xem logs của app"
-	@echo "  make logs-db      - Xem logs của database"
-	@echo "  make clean        - Xóa containers và volumes"
-	@echo "  make mvn-run      - Chạy app local với Maven"
-	@echo "  make mvn-build    - Build JAR file"
+	@echo "Development:"
+	@echo "  make dev-db       - Khởi động PostgreSQL"
+	@echo "  make dev-server   - Chạy Spring Boot server"
+	@echo "  make dev-client   - Chạy React frontend"
+	@echo "  make dev          - Chạy tất cả (DB + Server + Client)"
+	@echo ""
+	@echo "Docker Production:"
+	@echo "  make build        - Build tất cả Docker images"
+	@echo "  make start        - Khởi động tất cả containers"
+	@echo "  make stop         - Dừng tất cả containers"
+	@echo "  make logs         - Xem logs"
+	@echo "  make clean        - Xóa containers và images"
+	@echo ""
+	@echo "Database:"
+	@echo "  make db-shell     - Truy cập PostgreSQL shell"
+	@echo "  make pgadmin      - Khởi động pgAdmin"
 
 # ============================================
-# Development (chỉ chạy DB, app chạy local)
+# Development
 # ============================================
-dev:
-	docker-compose -f docker-compose.dev.yml up -d
-	@echo "PostgreSQL đã sẵn sàng tại localhost:5432"
-	@echo "Chạy: ./mvnw spring-boot:run"
 
-dev-stop:
-	docker-compose -f docker-compose.dev.yml down
+# Khởi động PostgreSQL cho development
+dev-db:
+	docker compose -f docker-compose.dev.yml up -d
+	@echo "PostgreSQL đang chạy tại localhost:5432"
+
+# Chạy Spring Boot server (cần có Java và Maven)
+dev-server:
+	cd server && ./mvnw spring-boot:run
+
+# Chạy React frontend
+dev-client:
+	cd client && npm run dev
+
+# Chạy tất cả cho development
+dev: dev-db
+	@echo "Đợi database khởi động..."
+	@sleep 5
+	@echo "Database đã sẵn sàng. Chạy server và client..."
+	@echo "Mở terminal mới chạy: make dev-server"
+	@echo "Mở terminal mới chạy: make dev-client"
 
 # ============================================
-# Production (chạy cả app và db)
+# Docker Production
 # ============================================
+
+# Build tất cả images
 build:
-	docker-compose build
+	docker compose build
 
-run:
-	docker-compose up -d
-	@echo "GradPro đang chạy tại http://localhost:8080"
-	@echo "Swagger UI: http://localhost:8080/swagger-ui.html"
+# Khởi động tất cả containers
+start:
+	docker compose up -d
+	@echo ""
+	@echo "Đang khởi động..."
+	@sleep 10
+	@docker compose ps
+	@echo ""
+	@echo "Frontend: http://localhost"
+	@echo "Backend API: http://localhost:8080"
+	@echo "pgAdmin: http://localhost:5050 (make pgadmin)"
 
-run-tools:
-	docker-compose --profile tools up -d
-	@echo "GradPro đang chạy tại http://localhost:8080"
-	@echo "pgAdmin: http://localhost:5050 (admin@gradpro.edu.vn / admin123)"
-
+# Dừng containers
 stop:
-	docker-compose down
+	docker compose down
 
-# ============================================
-# Logs
-# ============================================
+# Xem logs
 logs:
-	docker-compose logs -f app
+	docker compose logs -f
 
-logs-db:
-	docker-compose logs -f postgres
+logs-server:
+	docker compose logs -f server
 
-logs-all:
-	docker-compose logs -f
+logs-client:
+	docker compose logs -f client
 
-# ============================================
-# Clean up
-# ============================================
+# Xóa tất cả
 clean:
-	docker-compose down -v --remove-orphans
-	docker-compose -f docker-compose.dev.yml down -v --remove-orphans
-
-clean-images:
-	docker rmi gradpro-app 2>/dev/null || true
-
-# ============================================
-# Maven commands (chạy local)
-# ============================================
-mvn-run:
-	./mvnw spring-boot:run
-
-mvn-build:
-	./mvnw clean package -DskipTests
-
-mvn-test:
-	./mvnw test
+	docker compose down -v --rmi local
+	docker system prune -f
 
 # ============================================
 # Database
 # ============================================
+
+# Truy cập PostgreSQL shell
 db-shell:
 	docker exec -it gradpro-db psql -U postgres -d gradpro
 
-db-backup:
-	docker exec gradpro-db pg_dump -U postgres gradpro > backup_$$(date +%Y%m%d_%H%M%S).sql
+# Khởi động pgAdmin
+pgadmin:
+	docker compose --profile tools up -d pgadmin
+	@echo "pgAdmin: http://localhost:5050"
+	@echo "Email: admin@gradpro.edu.vn"
+	@echo "Password: admin123"
 
 # ============================================
-# Status
+# Utilities
 # ============================================
+
+# Kiểm tra trạng thái
 status:
-	docker-compose ps
+	docker compose ps
 
-health:
-	curl -s http://localhost:8080/actuator/health | python3 -m json.tool
+# Restart server
+restart-server:
+	docker compose restart server
+
+# Restart client
+restart-client:
+	docker compose restart client

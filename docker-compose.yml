@@ -14,7 +14,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./server/docker/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - gradpro-network
     healthcheck:
@@ -24,13 +24,13 @@ services:
       retries: 5
 
   # ============================================
-  # Spring Boot Application
+  # Spring Boot Backend API
   # ============================================
-  app:
+  server:
     build:
-      context: .
+      context: ./server
       dockerfile: Dockerfile
-    container_name: gradpro-app
+    container_name: gradpro-server
     restart: unless-stopped
     depends_on:
       postgres:
@@ -63,6 +63,22 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+
+  # ============================================
+  # React Frontend
+  # ============================================
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: gradpro-client
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "80:80"
+    networks:
+      - gradpro-network
 
   # ============================================
   # pgAdmin (Optional - Database Management)

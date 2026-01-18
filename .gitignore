@@ -3,6 +3,10 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 *.class
 
+# Node
+node_modules/
+dist/
+
 # IDE
 .idea/
 *.iml
@@ -27,6 +31,7 @@ uploads/
 # Environment
 .env
 .env.local
+.env.*.local
 
 # Docker
 docker-compose.override.yml
