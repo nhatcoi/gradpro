@@ -101,6 +101,7 @@ public class MilestoneService {
     /**
      * Lấy các mốc của đề tài
      */
+    @Transactional(readOnly = true)
     public List<MilestoneDto> getMilestonesByTopic(Long topicId) {
         return milestoneRepository.findByTopicIdOrderByOrderIndexAsc(topicId)
                 .stream()
@@ -108,8 +109,9 @@ public class MilestoneService {
                 .collect(Collectors.toList());
     }
     
+    @Transactional(readOnly = true)
     public MilestoneDto getMilestoneById(Long id) {
-        Milestone milestone = milestoneRepository.findById(id)
+        Milestone milestone = milestoneRepository.findByIdWithTopic(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Mốc thời gian", "id", id));
         return toDto(milestone);
     }

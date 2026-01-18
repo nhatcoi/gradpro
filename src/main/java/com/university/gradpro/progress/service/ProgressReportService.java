@@ -46,7 +46,7 @@ public class ProgressReportService {
             throw new ForbiddenException("Chỉ sinh viên mới có thể nộp báo cáo");
         }
         
-        Milestone milestone = milestoneRepository.findById(request.getMilestoneId())
+        Milestone milestone = milestoneRepository.findByIdWithTopic(request.getMilestoneId())
                 .orElseThrow(() -> new ResourceNotFoundException("Mốc thời gian", "id", request.getMilestoneId()));
         
         // Kiểm tra hoặc tạo progress report
@@ -78,7 +78,7 @@ public class ProgressReportService {
      */
     @Transactional
     public ProgressReportDto evaluateProgress(Long progressId, Long lecturerId, EvaluateProgressRequest request) {
-        ProgressReport progressReport = progressReportRepository.findById(progressId)
+        ProgressReport progressReport = progressReportRepository.findByIdWithRelations(progressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Báo cáo tiến độ", "id", progressId));
         
         // Kiểm tra quyền
@@ -106,6 +106,7 @@ public class ProgressReportService {
     /**
      * Lấy báo cáo tiến độ của sinh viên
      */
+    @Transactional(readOnly = true)
     public List<ProgressReportDto> getProgressByStudent(Long studentId) {
         return progressReportRepository.findByStudentId(studentId)
                 .stream()
@@ -116,6 +117,7 @@ public class ProgressReportService {
     /**
      * Lấy báo cáo theo đề tài
      */
+    @Transactional(readOnly = true)
     public List<ProgressReportDto> getProgressByTopic(Long topicId) {
         return progressReportRepository.findByTopicId(topicId)
                 .stream()
@@ -126,14 +128,16 @@ public class ProgressReportService {
     /**
      * Lấy báo cáo chờ đánh giá của GVHD
      */
+    @Transactional(readOnly = true)
     public PageResponse<ProgressReportDto> getPendingProgressBySupervisor(Long supervisorId, Pageable pageable) {
         Page<ProgressReport> page = progressReportRepository.findBySupervisorIdAndStatus(
                 supervisorId, ProgressStatus.SUBMITTED, pageable);
         return PageResponse.from(page.map(this::toDto));
     }
     
+    @Transactional(readOnly = true)
     public ProgressReportDto getProgressById(Long id) {
-        ProgressReport progressReport = progressReportRepository.findById(id)
+        ProgressReport progressReport = progressReportRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Báo cáo tiến độ", "id", id));
         return toDto(progressReport);
     }

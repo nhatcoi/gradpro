@@ -15,24 +15,31 @@ import java.util.Optional;
 @Repository
 public interface ProgressReportRepository extends JpaRepository<ProgressReport, Long> {
     
-    List<ProgressReport> findByStudentId(Long studentId);
+    @Query("SELECT pr FROM ProgressReport pr LEFT JOIN FETCH pr.milestone m LEFT JOIN FETCH m.topic t LEFT JOIN FETCH t.supervisor LEFT JOIN FETCH pr.student WHERE pr.student.id = :studentId")
+    List<ProgressReport> findByStudentId(@Param("studentId") Long studentId);
     
     List<ProgressReport> findByMilestoneId(Long milestoneId);
     
-    Optional<ProgressReport> findByMilestoneIdAndStudentId(Long milestoneId, Long studentId);
+    @Query("SELECT pr FROM ProgressReport pr LEFT JOIN FETCH pr.milestone m LEFT JOIN FETCH m.topic t LEFT JOIN FETCH t.supervisor LEFT JOIN FETCH pr.student WHERE m.id = :milestoneId AND pr.student.id = :studentId")
+    Optional<ProgressReport> findByMilestoneIdAndStudentId(@Param("milestoneId") Long milestoneId, @Param("studentId") Long studentId);
     
     List<ProgressReport> findByStudentIdAndStatus(Long studentId, ProgressStatus status);
     
-    @Query("SELECT pr FROM ProgressReport pr WHERE pr.milestone.topic.supervisor.id = :supervisorId")
+    @Query(value = "SELECT pr FROM ProgressReport pr LEFT JOIN FETCH pr.milestone m LEFT JOIN FETCH m.topic t LEFT JOIN FETCH t.supervisor LEFT JOIN FETCH pr.student WHERE t.supervisor.id = :supervisorId",
+           countQuery = "SELECT COUNT(pr) FROM ProgressReport pr WHERE pr.milestone.topic.supervisor.id = :supervisorId")
     Page<ProgressReport> findBySupervisorId(@Param("supervisorId") Long supervisorId, Pageable pageable);
     
-    @Query("SELECT pr FROM ProgressReport pr WHERE pr.milestone.topic.supervisor.id = :supervisorId AND pr.status = :status")
+    @Query(value = "SELECT pr FROM ProgressReport pr LEFT JOIN FETCH pr.milestone m LEFT JOIN FETCH m.topic t LEFT JOIN FETCH t.supervisor LEFT JOIN FETCH pr.student WHERE t.supervisor.id = :supervisorId AND pr.status = :status",
+           countQuery = "SELECT COUNT(pr) FROM ProgressReport pr WHERE pr.milestone.topic.supervisor.id = :supervisorId AND pr.status = :status")
     Page<ProgressReport> findBySupervisorIdAndStatus(@Param("supervisorId") Long supervisorId, 
                                                        @Param("status") ProgressStatus status, 
                                                        Pageable pageable);
     
-    @Query("SELECT pr FROM ProgressReport pr WHERE pr.milestone.topic.id = :topicId ORDER BY pr.milestone.orderIndex")
+    @Query("SELECT pr FROM ProgressReport pr LEFT JOIN FETCH pr.milestone m LEFT JOIN FETCH m.topic t LEFT JOIN FETCH t.supervisor LEFT JOIN FETCH pr.student WHERE t.id = :topicId ORDER BY m.orderIndex")
     List<ProgressReport> findByTopicId(@Param("topicId") Long topicId);
+    
+    @Query("SELECT pr FROM ProgressReport pr LEFT JOIN FETCH pr.milestone m LEFT JOIN FETCH m.topic t LEFT JOIN FETCH t.supervisor LEFT JOIN FETCH pr.student WHERE pr.id = :id")
+    Optional<ProgressReport> findByIdWithRelations(@Param("id") Long id);
     
     @Query("SELECT AVG(pr.score) FROM ProgressReport pr WHERE pr.student.id = :studentId AND pr.score IS NOT NULL")
     Double calculateAverageScoreByStudentId(@Param("studentId") Long studentId);
