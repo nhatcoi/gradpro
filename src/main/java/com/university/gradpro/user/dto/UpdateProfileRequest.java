@@ -1,0 +1,15 @@
+package com.university.gradpro.user.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
+import lombok.Data;
+
+@Data
+public class UpdateProfileRequest {
+    
+    @Email(message = "Email không hợp lệ")
+    private String email;
+    
+    @Size(max = 20, message = "Số điện thoại không được quá 20 ký tự")
+    private String phone;
+}

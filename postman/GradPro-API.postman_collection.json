@@ -1,0 +1,749 @@
+{
+  "info": {
+    "name": "GradPro - Quản lý Đồ án Tốt nghiệp",
+    "description": "API Collection cho hệ thống quản lý đồ án tốt nghiệp",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "UC-01: Đăng nhập (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"emailOrCode\": \"admin@university.edu.vn\",\n    \"password\": \"admin123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "UC-01: Đăng nhập (Giảng viên)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"emailOrCode\": \"giangvien@university.edu.vn\",\n    \"password\": \"gv123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "UC-01: Đăng nhập (Sinh viên)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.accessToken) {",
+                  "        pm.collectionVariables.set('accessToken', jsonData.data.accessToken);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"emailOrCode\": \"sinhvien@university.edu.vn\",\n    \"password\": \"sv123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "UC-02: Đổi mật khẩu",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"currentPassword\": \"admin123\",\n    \"newPassword\": \"newpassword123\",\n    \"confirmPassword\": \"newpassword123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/change-password"
+          }
+        },
+        {
+          "name": "Lấy thông tin user hiện tại",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"refreshToken\": \"your-refresh-token-here\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. User Management",
+      "item": [
+        {
+          "name": "UC-03: Cập nhật thông tin cá nhân",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"0123456789\",\n    \"email\": \"newemail@university.edu.vn\"\n}"
+            },
+            "url": "{{baseUrl}}/users/profile"
+          }
+        },
+        {
+          "name": "Lấy profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": "{{baseUrl}}/users/profile"
+          }
+        },
+        {
+          "name": "UC-06.1: Lấy danh sách users (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/manage?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "manage"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "20"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "UC-06.1: Tạo user mới (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"SV002\",\n    \"email\": \"sinhvien2@university.edu.vn\",\n    \"password\": \"password123\",\n    \"fullName\": \"Lê Văn E\",\n    \"phone\": \"0987654321\",\n    \"role\": \"STUDENT\",\n    \"department\": \"Khoa Công nghệ thông tin\",\n    \"major\": \"Công nghệ phần mềm\",\n    \"academicYear\": \"K21\"\n}"
+            },
+            "url": "{{baseUrl}}/users/manage"
+          }
+        },
+        {
+          "name": "UC-06.1: Cập nhật user (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"fullName\": \"Lê Văn E (Updated)\",\n    \"phone\": \"0111222333\"\n}"
+            },
+            "url": "{{baseUrl}}/users/manage/1"
+          }
+        },
+        {
+          "name": "Lấy danh sách giảng viên",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": "{{baseUrl}}/users/lecturers"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Topics",
+      "item": [
+        {
+          "name": "UC-4.1: GV đăng ký đề tài mở",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Xây dựng hệ thống quản lý thư viện sử dụng Spring Boot và React\",\n    \"description\": \"Đề tài nghiên cứu và xây dựng hệ thống quản lý thư viện hiện đại\",\n    \"requirements\": \"Có kiến thức về Java, Spring Boot, ReactJS\",\n    \"expectedOutcome\": \"Hệ thống hoàn chỉnh với đầy đủ chức năng\",\n    \"technology\": \"Java, Spring Boot, ReactJS, PostgreSQL\",\n    \"semester\": \"HK1-2025-2026\",\n    \"maxStudents\": 2\n}"
+            },
+            "url": "{{baseUrl}}/topics/propose"
+          }
+        },
+        {
+          "name": "UC-5.1: SV đề xuất đề tài",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Ứng dụng AI trong nhận diện khuôn mặt\",\n    \"description\": \"Nghiên cứu và phát triển ứng dụng nhận diện khuôn mặt sử dụng Deep Learning\",\n    \"technology\": \"Python, TensorFlow, OpenCV\",\n    \"supervisorId\": 4\n}"
+            },
+            "url": "{{baseUrl}}/topics/student-propose"
+          }
+        },
+        {
+          "name": "UC-3.1: Phê duyệt đề tài",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"approved\": true\n}"
+            },
+            "url": "{{baseUrl}}/topics/approve/1"
+          }
+        },
+        {
+          "name": "UC-3.1: Từ chối đề tài",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"approved\": false,\n    \"rejectionReason\": \"Đề tài không phù hợp với chuyên ngành\"\n}"
+            },
+            "url": "{{baseUrl}}/topics/approve/1"
+          }
+        },
+        {
+          "name": "UC-3.2: Phân công GVHD",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/topics/assign-supervisor/1?supervisorId=4",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics", "assign-supervisor", "1"],
+              "query": [
+                {"key": "supervisorId", "value": "4"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "UC-4.2, UC-5.2: Tìm kiếm đề tài",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/topics/search?keyword=thư viện&page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics", "search"],
+              "query": [
+                {"key": "keyword", "value": "thư viện"},
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "20"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Lấy đề tài có sẵn",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/topics/available?semester=HK1-2025-2026",
+              "host": ["{{baseUrl}}"],
+              "path": ["topics", "available"],
+              "query": [
+                {"key": "semester", "value": "HK1-2025-2026"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Lấy đề tài của tôi (GV)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": "{{baseUrl}}/topics/my-topics"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Registration",
+      "item": [
+        {
+          "name": "UC-2.1: Mở đợt đăng ký",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Đợt đăng ký đồ án HK1 2025-2026\",\n    \"semester\": \"HK1-2025-2026\",\n    \"startDate\": \"2025-09-01T00:00:00\",\n    \"endDate\": \"2025-09-30T23:59:59\",\n    \"description\": \"Đợt đăng ký đồ án tốt nghiệp học kỳ 1 năm học 2025-2026\"\n}"
+            },
+            "url": "{{baseUrl}}/registration-periods"
+          }
+        },
+        {
+          "name": "Lấy đợt đăng ký hiện tại",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": "{{baseUrl}}/registration-periods/current"
+          }
+        },
+        {
+          "name": "UC-5.3: SV đăng ký đề tài",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"topicId\": 1,\n    \"note\": \"Em rất quan tâm đến đề tài này\"\n}"
+            },
+            "url": "{{baseUrl}}/registrations/register"
+          }
+        },
+        {
+          "name": "UC-4.3: GV chọn sinh viên",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"approved\": true\n}"
+            },
+            "url": "{{baseUrl}}/registrations/approve/1"
+          }
+        },
+        {
+          "name": "Lấy đăng ký của tôi (SV)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": "{{baseUrl}}/registrations/my-registrations"
+          }
+        },
+        {
+          "name": "Lấy đăng ký theo GV",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/registrations/lecturer?status=PENDING",
+              "host": ["{{baseUrl}}"],
+              "path": ["registrations", "lecturer"],
+              "query": [
+                {"key": "status", "value": "PENDING"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Progress",
+      "item": [
+        {
+          "name": "UC-4.4: GV thiết lập mốc thời gian",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"topicId\": 1,\n    \"title\": \"Giai đoạn 1: Phân tích yêu cầu\",\n    \"description\": \"Hoàn thành phân tích yêu cầu và thiết kế hệ thống\",\n    \"orderIndex\": 1,\n    \"dueDate\": \"2025-10-15T23:59:59\",\n    \"weight\": 20.0\n}"
+            },
+            "url": "{{baseUrl}}/milestones"
+          }
+        },
+        {
+          "name": "Lấy mốc theo đề tài",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": "{{baseUrl}}/milestones/topic/1"
+          }
+        },
+        {
+          "name": "UC-5.4, UC-5.5: SV nộp báo cáo tiến độ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "data",
+                  "value": "{\"milestoneId\": 1, \"content\": \"Đã hoàn thành phân tích yêu cầu\"}",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/progress/submit"
+          }
+        },
+        {
+          "name": "UC-4.5: GV đánh giá tiến độ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"score\": 8.5,\n    \"comment\": \"Hoàn thành tốt, cần bổ sung thêm use case diagram\",\n    \"approved\": true\n}"
+            },
+            "url": "{{baseUrl}}/progress/evaluate/1"
+          }
+        },
+        {
+          "name": "UC-5.6: SV nộp báo cáo cuối",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "data",
+                  "value": "{\"topicId\": 1, \"abstractContent\": \"Tóm tắt nội dung đồ án...\"}",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/final-reports/submit"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Council",
+      "item": [
+        {
+          "name": "UC-3.3: Tạo hội đồng",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Hội đồng bảo vệ CNPM - Đợt 1\",\n    \"department\": \"Khoa Công nghệ thông tin\",\n    \"semester\": \"HK1-2025-2026\",\n    \"defenseDate\": \"2026-01-15T08:00:00\",\n    \"room\": \"Phòng A1-301\",\n    \"members\": [\n        {\"lecturerId\": 3, \"role\": \"CHAIRMAN\"},\n        {\"lecturerId\": 4, \"role\": \"SECRETARY\"},\n        {\"lecturerId\": 4, \"role\": \"REVIEWER\"}\n    ]\n}"
+            },
+            "url": "{{baseUrl}}/councils/create"
+          }
+        },
+        {
+          "name": "UC-2.2: Phân công HĐ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"councilId\": 1,\n    \"topicIds\": [1, 2, 3]\n}"
+            },
+            "url": "{{baseUrl}}/councils/assign"
+          }
+        },
+        {
+          "name": "UC-2.3: Xếp lịch bảo vệ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"topicId\": 1,\n    \"studentId\": 5,\n    \"orderNumber\": 1,\n    \"startTime\": \"08:00:00\",\n    \"endTime\": \"08:30:00\"\n}"
+            },
+            "url": "{{baseUrl}}/councils/1/schedules"
+          }
+        },
+        {
+          "name": "Lấy thông tin hội đồng",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": "{{baseUrl}}/councils/1"
+          }
+        },
+        {
+          "name": "Lấy HĐ theo học kỳ",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": "{{baseUrl}}/councils/semester/HK1-2025-2026"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Evaluation",
+      "item": [
+        {
+          "name": "GV chấm điểm hướng dẫn",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"topicId\": 1,\n    \"studentId\": 5,\n    \"score\": 8.5,\n    \"comment\": \"Sinh viên hoàn thành tốt đề tài\",\n    \"strengths\": \"Thiết kế hệ thống tốt, code sạch\",\n    \"weaknesses\": \"Tài liệu cần bổ sung thêm\"\n}"
+            },
+            "url": "{{baseUrl}}/evaluations/supervisor"
+          }
+        },
+        {
+          "name": "UC-4.7: HĐ chấm điểm",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"topicId\": 1,\n    \"studentId\": 5,\n    \"councilId\": 1,\n    \"score\": 8.0,\n    \"comment\": \"Trình bày tốt, trả lời phản biện khá\"\n}"
+            },
+            "url": "{{baseUrl}}/evaluations/council"
+          }
+        },
+        {
+          "name": "UC-5.7: SV xem điểm chi tiết",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": "{{baseUrl}}/evaluations/student"
+          }
+        },
+        {
+          "name": "UC-5.7: SV xem điểm tổng kết",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": "{{baseUrl}}/evaluations/student/final-scores"
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Reports",
+      "item": [
+        {
+          "name": "UC-2.4: Thống kê cấp trường",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/university/statistics?semester=HK1-2025-2026",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "university", "statistics"],
+              "query": [
+                {"key": "semester", "value": "HK1-2025-2026"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "UC-3.5: Thống kê cấp khoa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/department/statistics?department=Khoa Công nghệ thông tin&semester=HK1-2025-2026",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "department", "statistics"],
+              "query": [
+                {"key": "department", "value": "Khoa Công nghệ thông tin"},
+                {"key": "semester", "value": "HK1-2025-2026"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "UC-2.5: Xuất báo cáo cấp trường",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/university/export?semester=HK1-2025-2026",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "university", "export"],
+              "query": [
+                {"key": "semester", "value": "HK1-2025-2026"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "UC-3.6: Xuất báo cáo cấp khoa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/department/export?department=Khoa Công nghệ thông tin&semester=HK1-2025-2026",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "department", "export"],
+              "query": [
+                {"key": "department", "value": "Khoa Công nghệ thông tin"},
+                {"key": "semester", "value": "HK1-2025-2026"}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
